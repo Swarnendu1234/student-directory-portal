@@ -10,15 +10,27 @@ const transporter = nodemailer.createTransport({
 })
 
 export async function sendNoticeEmail(notice: any) {
+  let client
   try {
-    const client = new MongoClient(process.env.MONGODB_URI!)
+    if (!process.env.MONGODB_URI) {
+      console.error('MONGODB_URI not found')
+      return
+    }
+    
+    client = new MongoClient(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
+    })
     await client.connect()
     const db = client.db('student_directory')
     
     const students = await db.collection('students').find({}, { projection: { email: 1 } }).toArray()
     const emails = students.map(student => student.email).filter(Boolean)
     
-    if (emails.length === 0) return
+    if (emails.length === 0) {
+      console.log('No student emails found')
+      return
+    }
     
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -48,8 +60,9 @@ export async function sendNoticeEmail(notice: any) {
     }
     
     await transporter.sendMail(mailOptions)
-    await client.close()
   } catch (error) {
     console.error('Email sending failed:', error)
+  } finally {
+    if (client) await client.close()
   }
 }
