@@ -16,6 +16,7 @@ export function Navigation() {
     { name: "Home", href: "/" },
     { name: "Directory", href: "/directory" },
     { name: "Register", href: "/register" },
+    { name: "Notices", href: "/notices" },
     { name: "About", href: "https://www.gcetts.ac.in/", external: true },
   ]
 
