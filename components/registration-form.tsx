@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle, Upload, X, Loader2 } from "lucide-react"
+import { CheckCircle, Upload, X, Loader2, Heart } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 
@@ -25,6 +25,9 @@ interface FormData {
   currentYear: string
   semester: string
   cgpa: string
+  
+  // Interests
+  interests: string[]
 }
 
 const departments = [
@@ -36,6 +39,58 @@ const departments = [
 
 const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
 const semesters = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"]
+
+const interestCategories = {
+  "🎯 Academic & Professional": [
+    "Coding / Programming",
+    "Web Development", 
+    "App Development",
+    "Data Science / AI / ML",
+    "Cybersecurity",
+    "Entrepreneurship / Startups",
+    "Research & Innovation",
+    "Public Speaking / Debating",
+    "Writing / Blogging"
+  ],
+  "🎨 Creative & Media": [
+    "Video Editing",
+    "Graphic Design",
+    "Photography",
+    "Content Creation",
+    "Music (Singing / Instruments / Production)",
+    "Art & Sketching",
+    "Dance",
+    "Drama / Theatre",
+    "Film Making"
+  ],
+  "🎮 Tech & Gaming": [
+    "Gaming",
+    "Game Development",
+    "AR / VR",
+    "Robotics",
+    "Drone Technology"
+  ],
+  "🏃 Sports & Fitness": [
+    "Cricket",
+    "Football",
+    "Basketball",
+    "Badminton",
+    "Athletics",
+    "Chess",
+    "Table Tennis",
+    "Volleyball",
+    "Yoga / Meditation",
+    "Gym & Fitness"
+  ],
+  "🌍 Social & Lifestyle": [
+    "Volunteering / Social Work",
+    "Event Management",
+    "Traveling",
+    "Cooking",
+    "Fashion / Styling",
+    "Reading / Book Clubs"
+  ]
+}
 
 export function RegistrationForm() {
   const { toast } = useToast()
@@ -51,6 +106,7 @@ export function RegistrationForm() {
     currentYear: "",
     semester: "",
     cgpa: "",
+    interests: [],
   })
 
   const [isValidating, setIsValidating] = useState(false)
@@ -144,6 +200,7 @@ export function RegistrationForm() {
       submitData.append('homeTown', formData.homeTown)
       submitData.append('department', formData.department)
       submitData.append('currentYear', formData.currentYear)
+      submitData.append('interests', JSON.stringify(formData.interests))
       submitData.append('profilePhoto', formData.profilePhoto)
       
       const response = await fetch('/api/register', {
@@ -396,6 +453,64 @@ export function RegistrationForm() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Interests Section */}
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                <Heart className="text-pink-600 w-4 h-4" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-800">Interests & Hobbies</h3>
+              <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded-full">Optional</span>
+            </div>
+
+            <div className="space-y-4">
+              {Object.entries(interestCategories).map(([category, interests]) => (
+                <div key={category} className="space-y-3">
+                  <h4 className="font-medium text-slate-700 text-sm">{category}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {interests.map((interest) => {
+                      const isSelected = formData.interests.includes(interest)
+                      return (
+                        <button
+                          key={interest}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              interests: isSelected 
+                                ? prev.interests.filter(i => i !== interest)
+                                : [...prev.interests, interest]
+                            }))
+                          }}
+                          className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
+                            isSelected 
+                              ? 'bg-blue-100 border-blue-300 text-blue-700' 
+                              : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300'
+                          }`}
+                        >
+                          {interest}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {formData.interests.length > 0 && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-blue-700 font-medium mb-2">Selected Interests ({formData.interests.length}):</p>
+                <div className="flex flex-wrap gap-1">
+                  {formData.interests.map((interest) => (
+                    <span key={interest} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-6 border-t border-slate-200">

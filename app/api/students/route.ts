@@ -9,8 +9,9 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || ''
     const department = searchParams.get('department') || ''
     const year = searchParams.get('year') || ''
+    const interest = searchParams.get('interest') || ''
 
-    console.log('Search params:', { search, department, year })
+    console.log('Search params:', { search, department, year, interest })
 
     const { db } = await connectToDatabase()
     console.log('Connected to database')
@@ -33,6 +34,10 @@ export async function GET(request: NextRequest) {
     
     if (year && year !== 'All Years') {
       query.currentYear = year
+    }
+    
+    if (interest && interest !== 'All Interests') {
+      query.interests = { $in: [interest] }
     }
 
     console.log('Query:', query)

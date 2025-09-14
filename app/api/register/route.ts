@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
     const homeTown = formData.get('homeTown') as string
     const department = formData.get('department') as string
     const currentYear = formData.get('currentYear') as string
+    const interestsString = formData.get('interests') as string
     const profilePhoto = formData.get('profilePhoto') as File
+    
+    const interests = interestsString ? JSON.parse(interestsString) : []
 
     console.log('Received data:', { fullName, email, phone, department })
 
@@ -69,6 +72,7 @@ export async function POST(request: NextRequest) {
       homeTown,
       department,
       currentYear,
+      interests,
       profilePhotoUrl,
       createdAt: new Date()
     }

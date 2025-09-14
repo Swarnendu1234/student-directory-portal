@@ -18,6 +18,7 @@ interface Student {
   homeTown: string
   currentYear: string
   profilePhotoUrl?: string
+  interests?: string[]
   createdAt: string
 }
 
@@ -39,12 +40,23 @@ const years = [
   "4th Year"
 ]
 
+const allInterests = [
+  "Coding / Programming", "Web Development", "App Development", "Data Science / AI / ML", "Cybersecurity",
+  "Entrepreneurship / Startups", "Research & Innovation", "Public Speaking / Debating", "Writing / Blogging",
+  "Video Editing", "Graphic Design", "Photography", "Content Creation", "Music (Singing / Instruments / Production)",
+  "Art & Sketching", "Dance", "Drama / Theatre", "Film Making", "Gaming", "Game Development",
+  "AR / VR", "Robotics", "Drone Technology", "Cricket", "Football", "Basketball", "Badminton",
+  "Athletics", "Chess", "Table Tennis", "Volleyball", "Yoga / Meditation", "Gym & Fitness", "Volunteering / Social Work", "Event Management",
+  "Traveling", "Cooking", "Fashion / Styling", "Reading / Book Clubs"
+]
+
 
 
 export function StudentDirectory() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments")
   const [selectedYear, setSelectedYear] = useState("All Years")
+  const [selectedInterest, setSelectedInterest] = useState("All Interests")
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,6 +66,7 @@ export function StudentDirectory() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isTrending, setIsTrending] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set())
   const searchRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
@@ -86,7 +99,7 @@ export function StudentDirectory() {
     if (mounted) {
       fetchStudents()
     }
-  }, [searchQuery, selectedDepartment, selectedYear, mounted])
+  }, [searchQuery, selectedDepartment, selectedYear, selectedInterest, mounted])
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -165,6 +178,7 @@ export function StudentDirectory() {
       if (searchQuery) params.append('search', searchQuery)
       if (selectedDepartment !== 'All Departments') params.append('department', selectedDepartment)
       if (selectedYear !== 'All Years') params.append('year', selectedYear)
+      if (selectedInterest !== 'All Interests') params.append('interest', selectedInterest)
       
       console.log('Fetching students with params:', params.toString())
       
@@ -307,6 +321,20 @@ export function StudentDirectory() {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select value={selectedInterest} onValueChange={setSelectedInterest}>
+              <SelectTrigger className="w-full md:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All Interests">All Interests</SelectItem>
+                {allInterests.map((interest) => (
+                  <SelectItem key={interest} value={interest}>
+                    {interest}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -357,6 +385,7 @@ export function StudentDirectory() {
                   <th className="text-left p-4 font-semibold text-sm">Department</th>
                   <th className="text-left p-4 font-semibold text-sm">Year</th>
                   <th className="text-left p-4 font-semibold text-sm">Home Town</th>
+                  <th className="text-left p-4 font-semibold text-sm">Interests</th>
                   <th className="text-left p-4 font-semibold text-sm">Phone</th>
                   <th className="text-left p-4 font-semibold text-sm">Contact</th>
                 </tr>
@@ -364,7 +393,7 @@ export function StudentDirectory() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
                       Loading students...
                     </td>
                   </tr>
@@ -412,6 +441,29 @@ export function StudentDirectory() {
                         <span className="text-sm">{student.homeTown}</span>
                       </td>
                       <td className="p-4">
+                        <div className="flex flex-wrap gap-1 max-w-48">
+                          {student.interests && student.interests.length > 0 ? (
+                            <>
+                              {(expandedInterests.has(student._id) ? student.interests : student.interests.slice(0, 3)).map((interest) => (
+                                <span key={interest} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                  {interest}
+                                </span>
+                              ))}
+                              {student.interests.length > 3 && !expandedInterests.has(student._id) && (
+                                <button
+                                  onClick={() => setExpandedInterests(prev => new Set(prev).add(student._id))}
+                                  className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs hover:bg-gray-200 transition-colors cursor-pointer"
+                                >
+                                  +{student.interests.length - 3}
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">No interests listed</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4">
                         <div className="flex items-center gap-2">
                           <Phone className="w-3 h-3 text-muted-foreground" />
                           <span className="text-sm">{formatPhone(student.phone)}</span>
@@ -443,17 +495,18 @@ export function StudentDirectory() {
             </div>
             <h3 className="text-lg font-semibold text-slate-800 mb-2">No Students Found</h3>
             <p className="text-muted-foreground mb-4">
-              {searchQuery || selectedDepartment !== 'All Departments' || selectedYear !== 'All Years'
+              {searchQuery || selectedDepartment !== 'All Departments' || selectedYear !== 'All Years' || selectedInterest !== 'All Interests'
                 ? 'No students match your search criteria.' 
                 : 'No students have registered yet. Be the first to join!'}
             </p>
-            {(searchQuery || selectedDepartment !== 'All Departments' || selectedYear !== 'All Years') && (
+            {(searchQuery || selectedDepartment !== 'All Departments' || selectedYear !== 'All Years' || selectedInterest !== 'All Interests') && (
               <Button
                 variant="outline"
                 onClick={() => {
                   setSearchQuery("")
                   setSelectedDepartment("All Departments")
                   setSelectedYear("All Years")
+                  setSelectedInterest("All Interests")
                 }}
               >
                 Clear Filters
