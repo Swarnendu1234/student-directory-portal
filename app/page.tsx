@@ -13,7 +13,7 @@ export default function HomePage() {
       <section className="px-6 py-20 md:py-32">
         <div className="max-w-4xl mx-auto text-center">
           <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
-            Government College of Engineering & Textile Technology, Serampore
+            GCETT, Serampore
           </Badge>
 
           <h1 className="text-4xl md:text-6xl font-bold text-balance mb-6 tracking-tight">

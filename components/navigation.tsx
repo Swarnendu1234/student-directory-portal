@@ -32,7 +32,7 @@ export function Navigation() {
               className="w-10 h-10 rounded-lg"
             />
             <div className="hidden sm:block">
-              <h1 className="font-semibold text-lg">GCETT</h1>
+              <h1 className="font-semibold text-lg">Government College of Engineering & Textile Technology</h1>
             </div>
           </Link>
 
