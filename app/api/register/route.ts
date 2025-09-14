@@ -17,13 +17,12 @@ export async function POST(request: NextRequest) {
     const fullName = formData.get('fullName') as string
     const email = formData.get('email') as string
     const phone = formData.get('phone') as string
-    const wbjeeRoll = formData.get('wbjeeRoll') as string
     const homeTown = formData.get('homeTown') as string
     const department = formData.get('department') as string
     const currentYear = formData.get('currentYear') as string
     const profilePhoto = formData.get('profilePhoto') as File
 
-    console.log('Received data:', { fullName, email, phone, wbjeeRoll, department })
+    console.log('Received data:', { fullName, email, phone, department })
 
     // Connect to MongoDB
     const { db } = await connectToDatabase()
@@ -33,14 +32,13 @@ export async function POST(request: NextRequest) {
     const existing = await collection.findOne({
       $or: [
         { email },
-        { phone },
-        { wbjeeRollLastTwo: wbjeeRoll.slice(-2) }
+        { phone }
       ]
     })
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Email, phone, or WBJEE roll number already registered' },
+        { error: 'Email or phone number already registered' },
         { status: 400 }
       )
     }
@@ -68,7 +66,6 @@ export async function POST(request: NextRequest) {
       fullName,
       email,
       phone,
-      wbjeeRollLastTwo: wbjeeRoll.slice(-2),
       homeTown,
       department,
       currentYear,

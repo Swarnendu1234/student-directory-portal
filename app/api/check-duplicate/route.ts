@@ -14,8 +14,6 @@ export async function POST(request: NextRequest) {
       query = { email: value }
     } else if (field === 'phone') {
       query = { phone: value }
-    } else if (field === 'wbjeeRoll') {
-      query = { wbjeeRollLastTwo: value.slice(-2) }
     }
     
     const existing = await collection.findOne(query)
