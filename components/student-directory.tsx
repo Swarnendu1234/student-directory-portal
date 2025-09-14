@@ -15,7 +15,6 @@ interface Student {
   email: string
   department: string
   phone: string
-  wbjeeRollLastTwo: string
   homeTown: string
   currentYear: string
   profilePhotoUrl?: string
@@ -358,7 +357,6 @@ export function StudentDirectory() {
                   <th className="text-left p-4 font-semibold text-sm">Department</th>
                   <th className="text-left p-4 font-semibold text-sm">Year</th>
                   <th className="text-left p-4 font-semibold text-sm">Home Town</th>
-                  <th className="text-left p-4 font-semibold text-sm">WBJEE Roll</th>
                   <th className="text-left p-4 font-semibold text-sm">Phone</th>
                   <th className="text-left p-4 font-semibold text-sm">Contact</th>
                 </tr>
@@ -366,7 +364,7 @@ export function StudentDirectory() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
                       Loading students...
                     </td>
                   </tr>
@@ -412,11 +410,6 @@ export function StudentDirectory() {
                       </td>
                       <td className="p-4">
                         <span className="text-sm">{student.homeTown}</span>
-                      </td>
-                      <td className="p-4">
-                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
-                          {'*'.repeat(8)}{student.wbjeeRollLastTwo}
-                        </code>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">

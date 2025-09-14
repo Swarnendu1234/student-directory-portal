@@ -17,7 +17,6 @@ interface FormData {
   fullName: string
   email: string
   phone: string
-  wbjeeRoll: string
   profilePhoto: File | null
   homeTown: string
 
@@ -46,7 +45,6 @@ export function RegistrationForm() {
     fullName: "",
     email: "",
     phone: "",
-    wbjeeRoll: "",
     profilePhoto: null,
     homeTown: "",
     department: "",
@@ -56,14 +54,12 @@ export function RegistrationForm() {
   })
 
   const [isValidating, setIsValidating] = useState(false)
-  const [wbjeeValid, setWbjeeValid] = useState<boolean | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [duplicateErrors, setDuplicateErrors] = useState({
     email: '',
-    phone: '',
-    wbjeeRoll: ''
+    phone: ''
   })
 
   useEffect(() => {
@@ -111,8 +107,7 @@ export function RegistrationForm() {
       if (exists) {
         const messages = {
           email: 'This email is already registered.',
-          phone: 'Phone number already exists. Please use a different one.',
-          wbjeeRoll: 'WBJEE Roll Number is already registered.'
+          phone: 'Phone number already exists. Please use a different one.'
         }
         setDuplicateErrors(prev => ({ ...prev, [field]: messages[field as keyof typeof messages] }))
       } else {
@@ -123,26 +118,18 @@ export function RegistrationForm() {
     }
   }
 
-  const validateWBJEE = (rollNumber: string) => {
-    const isValid = /^\d{8,15}$/.test(rollNumber)
-    setWbjeeValid(isValid)
-    if (isValid) {
-      checkDuplicate('wbjeeRoll', rollNumber)
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitting) return
     
     // Basic validation
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.wbjeeRoll || !formData.homeTown || !formData.department || !formData.currentYear || !formData.profilePhoto) {
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.homeTown || !formData.department || !formData.currentYear || !formData.profilePhoto) {
       toast({ title: "Error", description: "Please fill all required fields", variant: "destructive" })
       return
     }
 
     // Check for duplicate errors
-    if (duplicateErrors.email || duplicateErrors.phone || duplicateErrors.wbjeeRoll) {
+    if (duplicateErrors.email || duplicateErrors.phone) {
       toast({ title: "Error", description: "Please fix duplicate field errors", variant: "destructive" })
       return
     }
@@ -154,7 +141,6 @@ export function RegistrationForm() {
       submitData.append('fullName', formData.fullName)
       submitData.append('email', formData.email)
       submitData.append('phone', formData.phone)
-      submitData.append('wbjeeRoll', formData.wbjeeRoll)
       submitData.append('homeTown', formData.homeTown)
       submitData.append('department', formData.department)
       submitData.append('currentYear', formData.currentYear)
@@ -261,39 +247,16 @@ export function RegistrationForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="wbjeeRoll" className="text-sm font-medium text-slate-700">WBJEE Roll Number *</Label>
-                  <div className="relative">
-                    <Input
-                      id="wbjeeRoll"
-                      value={formData.wbjeeRoll}
-                      onChange={(e) => {
-                        setFormData((prev) => ({ ...prev, wbjeeRoll: e.target.value }))
-                        validateWBJEE(e.target.value)
-                      }}
-                      placeholder="Enter WBJEE roll number"
-                      className={`h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500 ${duplicateErrors.wbjeeRoll || wbjeeValid === false ? 'border-red-500' : ''}`}
-                      required
-                    />
-                    {wbjeeValid === true && !duplicateErrors.wbjeeRoll && (
-                      <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
-                    )}
-                  </div>
-                  {wbjeeValid === false && <p className="text-sm text-red-500">Invalid WBJEE roll number format</p>}
-                  {duplicateErrors.wbjeeRoll && <p className="text-sm text-red-500">{duplicateErrors.wbjeeRoll}</p>}
-                  <p className="text-xs text-muted-foreground">Users roll numbers will not be disclosed to anyone</p>
+                  <Label htmlFor="homeTown" className="text-sm font-medium text-slate-700">Home Town *</Label>
+                  <Input
+                    id="homeTown"
+                    value={formData.homeTown}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, homeTown: e.target.value }))}
+                    placeholder="Enter your home town (e.g. Berhampore)"
+                    className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    required
+                  />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="homeTown" className="text-sm font-medium text-slate-700">Home Town *</Label>
-                <Input
-                  id="homeTown"
-                  value={formData.homeTown}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, homeTown: e.target.value }))}
-                  placeholder="Enter your home town (e.g. Berhampore)"
-                  className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
               </div>
             </div>
           </div>
@@ -434,8 +397,6 @@ export function RegistrationForm() {
               </div>
             </div>
           </div>
-
-
 
           <div className="pt-6 border-t border-slate-200">
             <Button
