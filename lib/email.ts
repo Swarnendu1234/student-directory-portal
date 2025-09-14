@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { MongoClient } from 'mongodb'
+import { connectToDatabase } from './mongodb'
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -10,19 +10,8 @@ const transporter = nodemailer.createTransport({
 })
 
 export async function sendNoticeEmail(notice: any) {
-  let client
   try {
-    if (!process.env.MONGODB_URI) {
-      console.error('MONGODB_URI not found')
-      return
-    }
-    
-    client = new MongoClient(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
-      connectTimeoutMS: 10000,
-    })
-    await client.connect()
-    const db = client.db('student_directory')
+    const { db } = await connectToDatabase()
     
     const students = await db.collection('students').find({}, { projection: { email: 1 } }).toArray()
     const emails = students.map(student => student.email).filter(Boolean)
@@ -62,7 +51,5 @@ export async function sendNoticeEmail(notice: any) {
     await transporter.sendMail(mailOptions)
   } catch (error) {
     console.error('Email sending failed:', error)
-  } finally {
-    if (client) await client.close()
   }
 }
