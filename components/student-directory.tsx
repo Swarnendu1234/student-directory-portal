@@ -43,6 +43,7 @@ const years = [
 const allInterests = [
   "Coding / Programming", "Web Development", "App Development", "Data Science / AI / ML", "Cybersecurity",
   "Entrepreneurship / Startups", "Research & Innovation", "Public Speaking / Debating", "Writing / Blogging",
+  "Constitution", "Law", "Political Science", "Public Administration", "Civil Service",
   "Video Editing", "Graphic Design", "Photography", "Content Creation", "Music (Singing / Instruments / Production)",
   "Art & Sketching", "Dance", "Drama / Theatre", "Film Making", "Gaming", "Game Development",
   "AR / VR", "Robotics", "Drone Technology", "Cricket", "Football", "Basketball", "Badminton",

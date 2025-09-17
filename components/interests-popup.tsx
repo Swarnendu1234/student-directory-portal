@@ -18,7 +18,12 @@ const interestCategories = {
     "Entrepreneurship / Startups",
     "Research & Innovation",
     "Public Speaking / Debating",
-    "Writing / Blogging"
+    "Writing / Blogging",
+    "Constitution",
+    "Law",
+    "Political Science",
+    "Public Administration",
+    "Civil Service"
   ],
   "🎨 Creative & Media": [
     "Video Editing",
