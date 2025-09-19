@@ -58,10 +58,15 @@ export function Navigation() {
                     setLoading(item.name)
                     router.push(item.href)
                   }}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 relative"
                 >
                   {loading === item.name && <Loader2 className="w-3 h-3 animate-spin" />}
                   {item.name}
+                  {item.name === 'Skill Test' && (
+                    <span className="absolute -top-2 -right-6 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold animate-pulse">
+                      New
+                    </span>
+                  )}
                 </button>
               ),
             )}
@@ -96,10 +101,15 @@ export function Navigation() {
                         setIsOpen(false)
                         router.push(item.href)
                       }}
-                      className="text-lg font-medium hover:text-primary transition-colors flex items-center gap-2"
+                      className="text-lg font-medium hover:text-primary transition-colors flex items-center gap-2 relative"
                     >
                       {loading === item.name && <Loader2 className="w-4 h-4 animate-spin" />}
                       {item.name}
+                      {item.name === 'Skill Test' && (
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse ml-2">
+                          New
+                        </span>
+                      )}
                     </button>
                   ),
                 )}
