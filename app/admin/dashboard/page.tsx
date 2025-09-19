@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus, Edit, Trash2, LogOut, Bell, Loader2, CheckCircle } from "lucide-react"
+import { Plus, Edit, Trash2, LogOut, Bell, Loader2, CheckCircle, Users, Eye } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface Notice {
   _id: string
@@ -21,10 +22,29 @@ interface Notice {
   createdAt: string
 }
 
+interface Submission {
+  _id: string
+  name: string
+  email: string
+  phone: string
+  linkedinId: string
+  portfolioDescription: string
+  category: 'AI/ML' | 'UI/UX'
+  portfolio_file_name: string
+  portfolio_url?: string
+  redesign_file_name?: string
+  redesign_url?: string
+  created_at: string
+  status: string
+}
+
 export default function AdminDashboard() {
   const [notices, setNotices] = useState<Notice[]>([])
+  const [submissions, setSubmissions] = useState<Submission[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmissionDialogOpen, setIsSubmissionDialogOpen] = useState(false)
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null)
+  const [viewingSubmission, setViewingSubmission] = useState<Submission | null>(null)
   const [loading, setLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [formData, setFormData] = useState({
@@ -33,10 +53,12 @@ export default function AdminDashboard() {
     type: "Academic",
     priority: "Medium"
   })
+
   const router = useRouter()
 
   useEffect(() => {
     fetchNotices()
+    fetchSubmissions()
   }, [])
 
   const fetchNotices = async () => {
@@ -48,6 +70,18 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error("Failed to fetch notices:", error)
+    }
+  }
+
+  const fetchSubmissions = async () => {
+    try {
+      const response = await fetch("/api/admin/submissions")
+      if (response.ok) {
+        const data = await response.json()
+        setSubmissions(data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch submissions:", error)
     }
   }
 
@@ -121,6 +155,8 @@ export default function AdminDashboard() {
     router.push("/admin/login")
   }
 
+
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "High": return "destructive"
@@ -146,8 +182,21 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Manage Notices</h2>
+        <Tabs defaultValue="notices" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="notices" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Notices
+            </TabsTrigger>
+            <TabsTrigger value="submissions" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Portfolio Submissions
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="notices" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Manage Notices</h2>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={resetForm}>
@@ -266,7 +315,187 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           ))}
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="submissions" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Portfolio Submissions</h2>
+              <div className="text-sm text-muted-foreground">
+                Total: {submissions.length} submissions
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {submissions.map((submission) => (
+                <Card key={submission._id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg">{submission.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{submission.email}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={submission.category === 'AI/ML' ? 'default' : 'secondary'}>
+                          {submission.category}
+                        </Badge>
+                        <Badge variant="outline">{submission.status}</Badge>
+                        <Button variant="ghost" size="sm" onClick={() => { setViewingSubmission(submission); setIsSubmissionDialogOpen(true) }}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Submitted: {new Date(submission.created_at).toLocaleDateString()}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div><strong>Phone:</strong> {submission.phone}</div>
+                      <div><strong>LinkedIn:</strong> {submission.linkedin_id ? (
+                        <a href={submission.linkedin_id} target="_blank" className="text-blue-600 hover:underline ml-1">View Profile</a>
+                      ) : (
+                        <span className="text-gray-500 ml-1">Not provided</span>
+                      )}</div>
+                      {submission.portfolio_file_name && (
+                        <div><strong>Portfolio:</strong> 
+                          {submission.portfolio_url ? (
+                            <a href={submission.portfolio_url} target="_blank" className="text-blue-600 hover:underline ml-1">
+                              {submission.portfolio_file_name}
+                            </a>
+                          ) : (
+                            <span className="ml-1">{submission.portfolio_file_name}</span>
+                          )}
+                        </div>
+                      )}
+                      {submission.redesign_file_name && (
+                        <div><strong>{submission.category === 'AI/ML' ? 'Solution:' : 'Redesign:'}</strong> 
+                          {submission.redesign_url ? (
+                            <a href={submission.redesign_url} target="_blank" className="text-orange-600 hover:underline ml-1">
+                              {submission.redesign_file_name}
+                            </a>
+                          ) : (
+                            <span className="ml-1">{submission.redesign_file_name}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Submission Dialog */}
+        <Dialog open={isSubmissionDialogOpen} onOpenChange={setIsSubmissionDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Submission Details</DialogTitle>
+            </DialogHeader>
+            {viewingSubmission && (
+              <div className="space-y-4 pr-2">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Name</Label>
+                    <p className="font-medium">{viewingSubmission.name}</p>
+                  </div>
+                  <div>
+                    <Label>Category</Label>
+                    <Badge variant={viewingSubmission.category === 'AI/ML' ? 'default' : 'secondary'}>
+                      {viewingSubmission.category}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Email</Label>
+                    <p className="break-all">{viewingSubmission.email}</p>
+                  </div>
+                  <div>
+                    <Label>Phone</Label>
+                    <p>{viewingSubmission.phone}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label>LinkedIn Profile</Label>
+                  {viewingSubmission.linkedin_id ? (
+                    <a href={viewingSubmission.linkedin_id} target="_blank" className="text-blue-600 hover:underline block break-all">
+                      {viewingSubmission.linkedin_id}
+                    </a>
+                  ) : (
+                    <p className="text-gray-500">Not provided</p>
+                  )}
+                </div>
+                {/* For AI/ML: Show files in correct order */}
+                {viewingSubmission.category === 'AI/ML' ? (
+                  <>
+                    {viewingSubmission.redesign_file_name && (
+                      <div>
+                        <Label>Solution File</Label>
+                        {viewingSubmission.redesign_url ? (
+                          <a href={viewingSubmission.redesign_url} target="_blank" className="text-orange-600 hover:underline font-medium block break-all">
+                            {viewingSubmission.redesign_file_name} (Download)
+                          </a>
+                        ) : (
+                          <p className="font-medium text-orange-600 break-all">{viewingSubmission.redesign_file_name}</p>
+                        )}
+                      </div>
+                    )}
+                    {viewingSubmission.portfolio_file_name && (
+                      <div>
+                        <Label>Additional Portfolio</Label>
+                        {viewingSubmission.portfolio_url ? (
+                          <a href={viewingSubmission.portfolio_url} target="_blank" className="text-blue-600 hover:underline block break-all">
+                            {viewingSubmission.portfolio_file_name} (Download)
+                          </a>
+                        ) : (
+                          <p className="break-all">{viewingSubmission.portfolio_file_name}</p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* For UI/UX: Keep original order */
+                  <>
+                    {viewingSubmission.portfolio_file_name && (
+                      <div>
+                        <Label>Portfolio File</Label>
+                        {viewingSubmission.portfolio_url ? (
+                          <a href={viewingSubmission.portfolio_url} target="_blank" className="text-blue-600 hover:underline block break-all">
+                            {viewingSubmission.portfolio_file_name} (Download)
+                          </a>
+                        ) : (
+                          <p className="break-all">{viewingSubmission.portfolio_file_name}</p>
+                        )}
+                      </div>
+                    )}
+                    {viewingSubmission.redesign_file_name && (
+                      <div>
+                        <Label>Redesign Challenge File</Label>
+                        {viewingSubmission.redesign_url ? (
+                          <a href={viewingSubmission.redesign_url} target="_blank" className="text-orange-600 hover:underline font-medium block break-all">
+                            {viewingSubmission.redesign_file_name} (Download)
+                          </a>
+                        ) : (
+                          <p className="font-medium text-orange-600 break-all">{viewingSubmission.redesign_file_name}</p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+                <div>
+                  <Label>Portfolio Description</Label>
+                  <p className="text-sm bg-gray-50 p-3 rounded">{viewingSubmission.portfolio_description || 'No description provided'}</p>
+                </div>
+                <div>
+                  <Label>Submitted At</Label>
+                  <p>{new Date(viewingSubmission.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

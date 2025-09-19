@@ -15,8 +15,10 @@ export function Navigation() {
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Directory", href: "/directory" },
+    { name: "Skill Test", href: "/skill-test" },
     { name: "Register", href: "/register" },
     { name: "Notices", href: "/notices" },
+    { name: "Contact", href: "/contact" },
     { name: "About", href: "https://www.gcetts.ac.in/", external: true },
   ]
 
@@ -32,7 +34,7 @@ export function Navigation() {
               className="w-10 h-10 rounded-lg"
             />
             <div className="hidden sm:block">
-              <h1 className="font-semibold text-lg">Government College of Engineering & Textile Technology</h1>
+              <h1 className="font-semibold text-lg">GCETT, Serampore</h1>
             </div>
           </Link>
 
