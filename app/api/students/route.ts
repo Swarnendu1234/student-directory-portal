@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb'
+import jwt from 'jsonwebtoken'
+
+function maskPhoneNumber(phone: string): string {
+  if (!phone || phone.length < 2) return phone
+  const lastTwo = phone.slice(-2)
+  const masked = '*'.repeat(phone.length - 2) + lastTwo
+  return masked
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,11 +57,72 @@ export async function GET(request: NextRequest) {
 
     console.log('Found students:', students.length)
 
-    return NextResponse.json(students)
+    // Check if request is from admin
+    const token = request.cookies.get('admin-token')?.value
+    let isAdmin = false
+    
+    if (token) {
+      try {
+        jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
+        isAdmin = true
+      } catch {
+        isAdmin = false
+      }
+    }
+    
+    // Mask phone numbers for non-admin users
+    const processedStudents = students.map(student => ({
+      ...student,
+      phone: isAdmin ? student.phone : maskPhoneNumber(student.phone || '')
+    }))
+
+    return NextResponse.json(processedStudents)
   } catch (error) {
     console.error('Fetch students error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch students', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { db } = await connectToDatabase()
+    
+    // Check for duplicate email or WBJEE roll
+    const existing = await db.collection('students').findOne({
+      $or: [
+        { email: body.email },
+        { wbjeeRollLastTwo: body.wbjeeRollLastTwo }
+      ]
+    })
+    
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Email or WBJEE roll already registered' },
+        { status: 400 }
+      )
+    }
+    
+    // Add timestamp
+    const studentData = {
+      ...body,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+    
+    const result = await db.collection('students').insertOne(studentData)
+    
+    return NextResponse.json(
+      { message: 'Registration successful', id: result.insertedId },
+      { status: 201 }
+    )
+  } catch (error) {
+    console.error('Registration error:', error)
+    return NextResponse.json(
+      { error: 'Failed to register student' },
       { status: 500 }
     )
   }
