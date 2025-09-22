@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { PopupProvider } from "@/components/popup-provider"
+import { UpdateInterestsPopup } from "@/components/update-interests-popup"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <PopupProvider>
           <Suspense fallback={null}>{children}</Suspense>
+          <UpdateInterestsPopup />
         </PopupProvider>
         <Analytics />
       </body>
